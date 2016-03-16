@@ -1,0 +1,11 @@
+---
+
+- hosts: all 
+  vars:
+    tor_hidden_services:
+      - dir: '/var/lib/tor/hidden_ansible_service/'
+        ports:
+          - hidden: 80
+            map: '127.0.0.1:10000'
+  roles:
+    - ../../ 

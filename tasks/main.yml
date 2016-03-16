@@ -1,0 +1,41 @@
+---
+
+- name: APT | Install tor
+  apt: >
+    pkg=tor
+    update_cache=yes
+    cache_valid_time=3600
+    state=present
+
+- name: FILE | Create hidden services dir
+  file: >
+    path={{ item.dir }}
+    state=directory
+    owner=debian-tor
+    group=debian-tor
+    mode=0700
+  with_items: "{{ tor_hidden_services }}" 
+  register: h
+
+- name: TEMPLATE | Deploy tor configuration
+  template: >
+    src=etc/tor/torrc.j2
+    dest=/etc/tor/torrc
+  notify: restart tor
+
+- name: SERVICE | Restart when hidden service added
+  service: name=tor state=restarted
+  when: h.changed
+
+
+#- name: COMMAND | Get onion hostname for all hidden services 
+#  command: cat {{ item.dir }}/hostname
+#  with_items: "{{ tor_hidden_services }}" 
+#  register: raw
+#
+#- debug: var=raw
+#
+#- name: SET_FACT | Get all data for hidden_services
+#  set_fact:
+#    tor_hidden_services: "for "
+ 
