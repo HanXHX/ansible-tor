@@ -14,8 +14,28 @@
     owner=debian-tor
     group=debian-tor
     mode=0700
-  with_items: "{{ tor_hidden_services }}" 
+  with_items: "{{ tor_hidden_services }}"
   register: h
+
+- name: COPY | Set hostname
+  copy: >
+    content="{{ item.hostname }}"
+    dest="{{ item.dir }}/hostname"
+    owner=debian-tor
+    group=debian-tor
+    mode=0600
+  with_items: "{{ tor_hidden_services }}"
+  when: item.key is defined and item.hostname is defined
+
+- name: COPY | Set private key
+  copy: >
+    content="{{ item.key }}"
+    dest="{{ item.dir }}/private_key"
+    owner=debian-tor
+    group=debian-tor
+    mode=0600
+  with_items: "{{ tor_hidden_services }}"
+  when: item.key is defined and item.hostname is defined
 
 - name: TEMPLATE | Deploy tor configuration
   template: >
@@ -28,9 +48,9 @@
   when: h.changed
 
 
-#- name: COMMAND | Get onion hostname for all hidden services 
+#- name: COMMAND | Get onion hostname for all hidden services
 #  command: cat {{ item.dir }}/hostname
-#  with_items: "{{ tor_hidden_services }}" 
+#  with_items: "{{ tor_hidden_services }}"
 #  register: raw
 #
 #- debug: var=raw
@@ -38,4 +58,4 @@
 #- name: SET_FACT | Get all data for hidden_services
 #  set_fact:
 #    tor_hidden_services: "for "
- 
+
