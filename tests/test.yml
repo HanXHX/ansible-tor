@@ -3,11 +3,15 @@
 - hosts: all 
   vars:
     tor_socks_policy_accept:
+      - '127.0.0.1'
       - '192.168.0.0/24'
     tor_hidden_services:
       - dir: '/var/lib/tor/hidden_ansible_service/'
         ports:
           - hidden: 80
             map: '127.0.0.1:10000'
+  pre_tasks:
+    - name: APT | Install NTP
+      apt: pkg=ntp update_cache=yes cache_valid_time=3600
   roles:
     - ../../ 
