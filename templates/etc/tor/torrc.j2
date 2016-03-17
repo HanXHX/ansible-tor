@@ -19,16 +19,25 @@
 ## Tor opens a socks proxy on port 9050 by default -- even if you don't
 ## configure one below. Set "SocksPort 0" if you plan to run Tor only
 ## as a relay, and not make any local application connections yourself.
-#SocksPort 9050 # Default: Bind to localhost:9050 for local connections.
-#SocksPort 192.168.0.1:9100 # Bind to this address:port too.
+SocksPort {{ tor_SocksPort | default(0) }}
 
 ## Entry policies to allow/deny SOCKS requests based on IP address.
 ## First entry that matches wins. If no SocksPolicy is set, we accept
 ## all (and only) requests that reach a SocksPort. Untrusted users who
 ## can access your SocksPort may be able to learn about the connections
 ## you make.
-#SocksPolicy accept 192.168.0.0/16
-#SocksPolicy reject *
+{% if tor_socks_policy_accept | length > 0 %}
+{% for p in tor_socks_policy_accept %}
+SocksPolicy accept {{ p }}
+{% endfor %}
+{% if tor_socks_policy_reject | length == 0 %}
+SocksPolicy reject *
+{% else %}
+{% for p in tor_socks_policy_reject %}
+SocksPolicy reject {{ p }}
+{% endfor %}
+{% endif %}
+{% endif %}
 
 ## Logs go to stdout at level "notice" unless redirected by something
 ## else, like one of the below lines. You can have as many Log lines as
@@ -73,7 +82,7 @@
 ## address y:z.
 
 {% for service in tor_hidden_services %}
-HiddenServiceDir {{ service.dir }} 
+HiddenServiceDir {{ service.dir }}
 {% for port in service.ports %}
 HiddenServicePort {{ port.hidden }} {{ port.map }}
 {% endfor %}

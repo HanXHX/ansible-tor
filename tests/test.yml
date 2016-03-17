@@ -2,6 +2,8 @@
 
 - hosts: all 
   vars:
+    tor_socks_policy_accept:
+      - '192.168.0.0/24'
     tor_hidden_services:
       - dir: '/var/lib/tor/hidden_ansible_service/'
         ports:
