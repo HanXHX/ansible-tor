@@ -1,40 +1,38 @@
 ---
 
+#
+# Socks
+#
 tor_SocksPort: 9050 # Default: Bind to localhost:9050 for local connections.
-
-#SocksPolicy accept 192.168.0.0/16
-#SocksPolicy reject *
 tor_socks_policy_accept: []
 tor_socks_policy_reject: []
 
+#
+# Logging
+#
 #Log notice file /var/log/tor/notices.log
 #Log debug file /var/log/tor/debug.log
 #Log notice syslog
 #Log debug stderr
 
+#
+# Misc
+#
 tor_RunAsDaemon: 1
 tor_DataDirectory: '/var/lib/tor'
 #ControlPort 9051
 #HashedControlPassword 16:872860B76453A77D60CA2BB8C1A7042072093276A3D701AD684053EC4C
 #CookieAuthentication 1
 
+#
+# Hidden services
+#
 tor_hidden_services: []
 
+
 #
-# Example
-#tor_hidden_services:
-#  - dir: '/var/lib/tor/hidden_service/'
-#    ports:
-#      - hidden: 80
-#        map: '127.0.0.1:10000'
-
-
-
-#HiddenServiceDir /var/lib/tor/hidden_service/
-#HiddenServicePort 80 127.0.0.1:80
-#HiddenServiceDir /var/lib/tor/other_hidden_service/
-#HiddenServicePort 80 127.0.0.1:80
-#HiddenServicePort 22 127.0.0.1:22
+# Relay
+#
 
 #ORPort 9001
 #ORPort 443 NoListen
