@@ -1,6 +1,6 @@
 ---
 
-- hosts: all 
+- hosts: all
   vars:
     tor_socks_policy_accept:
       - '127.0.0.1'
@@ -10,8 +10,28 @@
         ports:
           - hidden: 80
             map: '127.0.0.1:10000'
+    nginx_dir: '/var/www/tor'
   pre_tasks:
-    - name: APT | Install NTP
-      apt: pkg=ntp update_cache=yes cache_valid_time=3600
+    - name: APT | Install packages
+      apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
+      with_items: ['nginx', 'ntp']
+  handlers:
+    - name: reload nginx
+      service: name=nginx state=reloaded
   roles:
-    - ../../ 
+    - ../../
+  tasks:
+    - name: COPY | Add tor nginx vhost
+      copy: >
+        content="server { listen {{ tor_hidden_services[0].ports[0].map }}; server_name {{ tor_hidden_services[0].hostname }}; root {{ nginx_dir }};  }"
+        dest=/etc/nginx/sites-enabled/tor
+      notify: reload tor
+    - name: FILE | Create webdir
+      file: path={{ nginx_dir }} state=directory
+    - name: COPY | Add file
+      copy: content="TOR" dest="{{ nginx_dir }}/index.html"
+    - name: COMMAND | Check hidden service
+      command: torify curl {{ tor_hidden_services[0].hostname }}
+      register: tc
+      failed_when: tc.stdout.find('TOR') == -1
+      changed_when: false
