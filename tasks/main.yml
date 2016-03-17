@@ -43,19 +43,16 @@
     dest=/etc/tor/torrc
   notify: restart tor
 
+# We need to restart tor when we add an hidden service without key
 - name: SERVICE | Restart when hidden service added
   service: name=tor state=restarted
   when: h.changed
 
+- name: COMMAND | Get onion hostname for all hidden services
+  command: cat {{ item.dir }}/hostname
+  with_items: "{{ tor_hidden_services }}"
+  register: raw
 
-#- name: COMMAND | Get onion hostname for all hidden services
-#  command: cat {{ item.dir }}/hostname
-#  with_items: "{{ tor_hidden_services }}"
-#  register: raw
-#
-#- debug: var=raw
-#
-#- name: SET_FACT | Get all data for hidden_services
-#  set_fact:
-#    tor_hidden_services: "for "
-
+- name: SET_FACT | Get all data for hidden_services
+  set_fact:
+    tor_hidden_services: "[{% for i in raw.results %}{{ i.item | combine({ 'hostname': i.stdout }) }},{% endfor %}]"
