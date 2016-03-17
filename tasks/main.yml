@@ -52,6 +52,7 @@
   command: cat {{ item.dir }}/hostname
   with_items: "{{ tor_hidden_services }}"
   register: raw
+  changed_when: false
 
 - name: SET_FACT | Get all data for hidden_services
   set_fact:
